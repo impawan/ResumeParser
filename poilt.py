@@ -20,6 +20,10 @@ import re
 from spacy.matcher import Matcher
 import pandas as pd
 import numpy as np
+from nltk import word_tokenize
+from nltk.corpus import stopwords 
+stop_words = set(stopwords.words('english'))
+
 
 nlp = spacy.load('en')
 
@@ -35,6 +39,8 @@ def extract_email(text):
             return email[0].split()[0].strip(';')
         except IndexError:
             return None
+
+
 
 
 def extract_phone_number(text):
@@ -80,14 +86,62 @@ def extract_text(pdfFile):
         
 def text_cleaning(text):
     text = text.replace("\n"," ")
+    text = remove_word(text)
+    text = text.lower()
     return text 
+ 
     
-        
-        
-        
 
+def remove_word(text):
+    ret = list()
+    for word in text.split():
+        if word not in stop_words:
+            ret.append(word)
+    
+    ret = ' '.join(ret)
+    return ret  
+
+
+def GetFreqCount(text):
+    '''
+    This method return dictonary of word with frequencies
+    '''
+    dic = {} 
+    word_tokens = word_tokenize(text)
+    size = len(word_tokens)
+    for word in word_tokens :
+        if word in dic:
+            dic[word] = dic[word]+1
+                
+        else:
+            dic[word] = 1
+    return  dic,size
+ 
 def extrract_skill(text):
-    for words in text.split():
-        if words in sklills_list:
-            print(words)
+    """increasing order of the skill"""
+    dic,size = GetFreqCount(text)
+    skill = set()
+    for word in text.split():
+        if word in sklills_list:
+            if dic[word] > 2:
+                skill.add(word)
+    return skill    
+   
+
+
+def ConvertDictToList(dic):
+    '''
+    This method convert dictonary to list data type
+    '''
+    
+    dictList = list()
+    for key in dic.items():
+        temp = [key,dic[key]]
+        dictList.append(temp)
+    return dictList  
+
+
+    
+    
+    
     
