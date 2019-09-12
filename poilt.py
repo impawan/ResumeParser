@@ -14,7 +14,7 @@ from pdfminer.pdfdevice import PDFDevice
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage,PDFTextExtractionNotAllowed
 import io
-import nltk
+#import nltk
 import spacy
 from spacy.matcher import Matcher
 
