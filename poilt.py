@@ -23,13 +23,16 @@ import numpy as np
 from nltk import word_tokenize
 from nltk.corpus import stopwords 
 stop_words = set(stopwords.words('english'))
+from nltk.stem.porter import PorterStemmer
+porter_stemmer  = PorterStemmer()
+
 
 
 nlp = spacy.load('en')
 
 matcher = Matcher(nlp.vocab)
 
-skills = pd.read_csv("one_word_skill.csv")
+skills = pd.read_csv("one_word_skill_stemm.csv")
 
 sklills_list = skills.skill.tolist()
 def extract_email(text):
@@ -83,6 +86,14 @@ def extract_text(pdfFile):
 	filhandler.close()
 	return text
             
+def stem(data):
+    tokenization = nltk.word_tokenize(data)
+    sentence = ''
+    for w in tokenization :
+        if w not in stop_words:
+            w= porter_stemmer.stem(w.lower())
+            sentence  = sentence+' '+w
+    return sentence
         
 def text_cleaning(text):
     text = text.replace("\n"," ")
@@ -120,28 +131,35 @@ def GetFreqCount(text):
 def extrract_skill(text):
     """increasing order of the skill"""
     dic,size = GetFreqCount(text)
-    skill = set()
+    #skill = set()
+    skill = dict()
+    
     for word in text.split():
         if word in sklills_list:
-            if dic[word] > 2:
-                skill.add(word)
+            if word not in skill:
+                if dic[word] > 1:
+                    #skill.add(str(dic[word])+' '+word)
+                    skill[word] = dic[word]
     return skill    
    
-
 
 def ConvertDictToList(dic):
     '''
     This method convert dictonary to list data type
     '''
-    
     dictList = list()
-    for key in dic.items():
+    for key in dic.keys():
+#        print(dic[key])
         temp = [key,dic[key]]
         dictList.append(temp)
-    return dictList  
+    return dictList 
 
-
-    
+text = extract_text('Nikhil_Saxena_Resume.pdf')    
+text = text_cleaning(text)
+skill_sort = extrract_skill(text)
+skill_sort = ConvertDictToList(skill_sort)
+skill_sort = pd.DataFrame(skill_sort,columns = ['skill','count'])
+print(skill_sort)
     
     
     
