@@ -97,6 +97,7 @@ def stem(data):
         
 def text_cleaning(text):
     text = text.replace("\n"," ")
+    text = text.replace("'"," ")
     text = remove_word(text)
     text = text.lower()
     return text 
@@ -140,7 +141,16 @@ def extrract_skill(text):
                 if dic[word] > 1:
                     #skill.add(str(dic[word])+' '+word)
                     skill[word] = dic[word]
-    return skill    
+                    
+                    
+    skill_sort = ConvertDictToList(skill)
+    skill_sort = pd.DataFrame(skill_sort,columns = ['skill','count'])
+    skill_sort = skill_sort.sort_values(['count'],ascending=False)
+
+    primary_skill = skill_sort[skill_sort['count']>=np.mean(skill_sort['count'])]
+    
+    secondry_skill = skill_sort[skill_sort['count']<np.mean(skill_sort['count'])]                
+    return primary_skill['skill'].tolist(), secondry_skill['skill'].tolist()
    
 
 def ConvertDictToList(dic):
@@ -154,12 +164,21 @@ def ConvertDictToList(dic):
         dictList.append(temp)
     return dictList 
 
-text = extract_text('Nikhil_Saxena_Resume.pdf')    
-text = text_cleaning(text)
-skill_sort = extrract_skill(text)
-skill_sort = ConvertDictToList(skill_sort)
-skill_sort = pd.DataFrame(skill_sort,columns = ['skill','count'])
-print(skill_sort)
+
+def resume_parser(pdfFile):
+    text = extract_text('Nikhil_Saxena_Resume.pdf')    
+    profile = dict()
+    profile['Name'] = extract_name(text)
+    text = text_cleaning(text)
     
+    profile['mobile number'] = extract_phone_number(text)
+    profile['email'] = extract_email(text)
+    primary_skill, secondry_skill = extrract_skill(text)
+    profile['Primary Skill'] = primary_skill
+    profile['secondry skill'] = secondry_skill
+    return profile
+
+
+
     
     
